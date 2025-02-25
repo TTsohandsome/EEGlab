@@ -8,7 +8,7 @@ AllLeft = [];
 AllRight = []; % 确保 AllRight 变量已初始化
 
 % 循环读取文件夹
-for i = 1:50     % 依次读取50个文件
+for i = 49:50     % 依次读取50个文件
     if i<10
         SubFolderFiles = [path,'\sourcedata\sub-0' num2str(i) '\'];
     else
@@ -43,6 +43,33 @@ for i = 1:50     % 依次读取50个文件
         data = [];
         for t = 1:size(eeg0,1)
             data = [data;squeeze(eeg0(t,:,:))];
+        end
+
+
+
+        % 标准化方法1：通道级z-score归一化
+        data_zscore = data; % Initialize with original data
+        channel_means = mean(data, 2);
+        channel_stds = std(data, 0, 2);
+        valid_channels = channel_stds ~= 0;
+        if any(~valid_channels)
+            warning('Some channels have zero variance; skipping z-score normalization for those channels.');
+        end
+        data_zscore(valid_channels, :) = (data(valid_channels, :) - channel_means(valid_channels)) ./ channel_stds(valid_channels);
+
+        % 标准化方法2：Min-Max归一化
+        data_minmax = (data - min(data, [], 2)) ./ (max(data, [], 2) - min(data, [], 2));
+        data_minmax(:, all(data_minmax == 0, 1)) = 0; % Handle zero range
+
+        % 标准化方法3：均值归一化
+        data_mean = (data - mean(data, 2)) ./ (max(data, [], 2) - min(data, [], 2));
+        data_mean(:, all(data_mean == 0, 1)) = 0; % Handle zero range
+
+        % 选择一种标准化方法进行后续处理
+        % data = data_zscore; % Use the fixed z-score normalization
+
+        if any(isnan(data(:)))
+            error('NaN values found in data after normalization.');
         end
         
         % 算法分类

@@ -1,3 +1,6 @@
+在运行PlotFigure.m之前要先运行根目录下的installer.m
+在运行PlotAccuracy.m之前要先运行eeglab/eeglab.m
+
 This folder contains 22 functions. Install the following libraries before running the function.
 
 Install MATLAB library:
